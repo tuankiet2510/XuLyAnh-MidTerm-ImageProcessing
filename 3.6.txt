@@ -1,0 +1,67 @@
+https://www.geeksforgeeks.org/image-enhancement-techniques-using-opencv-python/
+https://stackoverflow.com/questions/56905592/automatic-contrast-and-brightness-adjustment-of-a-color-photo-of-a-sheet-of-pape
+In the cv2.addWeighted() function, the contrast and brightness parameters control the amount of adjustment applied to the input image.
+
+The range of values for contrast is typically between 0 and 3, where a value of 1 indicates no change in contrast, values less than 1 decrease the contrast, and values greater than 1 increase the contrast. If you want to maintain the original contrast, you can set the contrast parameter to 1.
+
+The range of values for brightness is typically between -255 and 255. A value of 0 means no change in brightness, negative values decrease the brightness, and positive values increase the brightness. If you want to maintain the original brightness, you can set the brightness parameter to 0.
+
+In the provided code snippet, the output image will be a weighted combination of the input image and a black image (generated using np.zeros(image.shape, image.dtype)), where the weights are determined by the contrast and brightness parameters. The contrast parameter controls the contribution of the input image, while the brightness parameter controls the contribution of the black image.
+
+def adjust_vignette(image, strength):
+    # Apply a vignette effect to the image.
+    rows, cols = image.shape[:2]
+    # Create vignette mask using Gaussian kernels.
+    kernel_x = cv2.getGaussianKernel(cols, strength * cols)
+    kernel_y = cv2.getGaussianKernel(rows, strength * rows)
+    kernel = kernel_y * kernel_x.T
+    mask = 255 * kernel / np.linalg.norm(kernel)
+    vignette = np.copy(image)
+    # Apply the mask to each channel in the image.
+    for i in range(3):
+        vignette[..., i] = vignette[..., i] * mask
+    return vignette
+range value of strength , what is the value adapt that image dont change ?
+
+The strength parameter in your adjust_vignette function is used to determine the intensity of the vignette effect. This parameter influences the size of the Gaussian kernels used to create the vignette mask. The actual range of values that strength can take depends on how you want the vignette effect to appear. Generally, this is how the strength parameter behaves:
+
+Strength Close to 0: If the strength is close to 0, the Gaussian kernel will be very broad. This results in a very light or nearly non-existent vignette effect. Essentially, the image will remain almost unchanged.
+
+Increasing Strength: As you increase the strength, the Gaussian kernel becomes more focused, resulting in a more pronounced vignette effect. The corners of the image will become progressively darker.
+
+Excessive Strength: If the strength is too high, the vignette effect will be very intense, potentially obscuring much of the image.
+
+To answer your question about the value of strength at which the image does not change, it would be when strength is very close to 0. However, the exact value might depend on the s
+pecific characteristics of the image and how perceptible a minimal vignette effect is. You might start with a very small value like 0.01 or even lower and adjust it based on the observed effect on your specific images.
+
+Trong hàm adjust_vignette mà bạn đã cung cấp, strength là một tham số quan trọng quyết định độ mạnh của hiệu ứng vignette được áp dụng lên ảnh. Hãy xem xét vùng giá trị hợp lý cho strength dựa trên cách hàm của bạn hoạt động:
+
+Giá Trị strength Gần 0: Khi strength gần 0, hạt nhân Gaussian (Gaussian kernel) sẽ có độ rộng lớn, dẫn đến hiệu ứng vignette rất nhẹ hoặc gần như không có. Trong trường hợp này, ảnh sẽ gần như không thay đổi.
+
+Tăng Giá Trị strength: Khi tăng giá trị của strength, hạt nhân Gaussian trở nên tập trung hơn, tạo ra hiệu ứng vignette rõ ràng hơn. Các góc của ảnh sẽ trở nên tối dần.
+
+Giá Trị strength Cao: Nếu strength quá cao, hiệu ứng vignette sẽ rất mạnh, có thể che lấp phần lớn ảnh.
+
+Về mặt kỹ thuật, strength có thể nhận bất kỳ giá trị nào từ 0 trở lên, nhưng trong thực tế, bạn sẽ muốn giới hạn nó trong một khoảng nào đó để hiệu ứng vignette phù hợp và không quá mạnh. Thông thường, bạn có thể bắt đầu với giá trị như 0.1 và tăng dần để xem hiệu ứng. Một giá trị strength khoảng 0.5 đến 1.0 thường là đủ để tạo ra một hiệu ứng vignette rõ ràng nhưng không quá mạnh.
+
+Để xác định giá trị cụ thể phù hợp nhất cho ảnh của bạn, bạn có thể thử nghiệm với các giá trị khác nhau và xem kết quả.
+
+def apply_blur(image, kernel_size=5):
+    # Apply a blur effect to the image.
+    blurred_image = cv2.GaussianBlur(image, (kernel_size, kernel_size), 0)
+    return blurred_image
+range value of kernel_size ?
+
+The kernel_size parameter in the apply_blur function determines the size of the Gaussian kernel used for blurring the image. The range of values for kernel_size can be understood as follows:
+
+Minimum Value: The minimum value for kernel_size is typically 1. However, a kernel_size of 1 means no blurring will be applied, as the kernel is just a single pixel.
+
+Odd Numbers Only: kernel_size should be an odd number. This is because the Gaussian blur operation requires a central pixel to distribute the blur evenly. If an even number is used, it may lead to unexpected results or errors.
+
+Typical Range: Commonly used values for kernel_size start from 3 (small blur effect) and go upwards. The upper limit is not strictly defined, but as the kernel_size increases, the blur effect becomes more pronounced. A very large kernel (e.g., 31, 51, etc.) will result in a very heavy blur, where details in the image become very indistinct.
+
+Dependent on Image Size: The appropriate value of kernel_size also depends on the resolution and size of the image. For larger images, a larger kernel_size might be needed to achieve a noticeable blur effect, while for smaller images, a smaller kernel_size might be sufficient.
+
+Performance Considerations: Larger kernel_size values will require more computations, which can impact performance, especially for large images or when processing many images.
+
+In practice, you might commonly see kernel_size values like 3, 5, 7, 9, etc., being used. The choice of kernel_size depends on the specific requirements of the blur effect you're aiming to achieve in your image. Experimenting with different values is often the best way to determine the most suitable kernel_size for your particular application.
