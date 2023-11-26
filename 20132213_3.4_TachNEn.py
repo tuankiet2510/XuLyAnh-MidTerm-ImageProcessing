@@ -44,43 +44,32 @@ def chroma_key(background_img_path, object_img_path):
 background_path = 'D:\\XuLyAnh\\IMAGE\\green_plain_bg.jpg'
 object_path = 'D:\\XuLyAnh\\IMAGE\\elephant_green.png'
 
-# Tạo ảnh kết quả
-#result = chroma_key(background_img_path, object_img_path)
-
-# Read the background and object images
 background = cv2.imread(background_path)
 object_img = cv2.imread(object_path)
 
 # Ensure the background and object image have the same dimensions
 if background.shape[:2] != object_img.shape[:2]:
-    background = cv2.resize(background, (object_img.shape[1], object_img.shape[0]), interpolation=cv2.INTER_AREA)
+    background = cv2.resize(background, (object_img.shape[1], object_img.shape[0]), interpolation=cv2.INTER_LINEAR)
 
-# Convert images to float32 for subtraction
-background = np.float32(background)
-object_img = np.float32(object_img)
+# Convert the object image to the HSV color space
+hsv = cv2.cvtColor(object_img, cv2.COLOR_BGR2HSV)
 
-# Calculate the absolute difference between the background and the object images
-diff = cv2.absdiff(background, object_img)
+# Define the range of the green color in HSV
+# These values can be adjusted to better fit the green screen color range
+lower_green = np.array([40, 40, 40])
+upper_green = np.array([70, 255, 255])
 
-# Convert the difference to grayscale
-gray_diff = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+# Create a mask that detects only green colors in the image
+mask = cv2.inRange(hsv, lower_green, upper_green)
 
-# Threshold the grayscale difference to create a mask
-_, mask = cv2.threshold(gray_diff, 30, 255, cv2.THRESH_BINARY)
-# Make sure the mask is a single channel and 8-bit
-mask = mask.astype(np.uint8)
-# Invert the mask to get the foreground
-foreground_mask = cv2.bitwise_not(mask)
+# Invert the mask to get the elephant
+mask_inv = cv2.bitwise_not(mask)
 
-# Use the mask to extract the object
-extracted_object = cv2.bitwise_and(object_img, object_img, mask=foreground_mask)
-
-# Convert the result to uint8 format
-extracted_object = cv2.convertScaleAbs(extracted_object)
-
+# Use the inverted mask to extract the elephant from the object image
+elephant_extracted = cv2.bitwise_and(object_img, object_img, mask=mask_inv)
 # Hiển thị và lưu kết quả nếu thành công
-if extracted_object is not None:
-    cv2.imshow('Chroma Key Result', extracted_object)
+if elephant_extracted is not None:
+    cv2.imshow('Chroma Key Result', elephant_extracted)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    cv2.imwrite('D:\\XuLyAnh\\IMAGE\\chroma_key_result.jpg', extracted_object)
+    cv2.imwrite('D:\\XuLyAnh\\IMAGE\\chroma_key_result.jpg', elephant_extracted)
