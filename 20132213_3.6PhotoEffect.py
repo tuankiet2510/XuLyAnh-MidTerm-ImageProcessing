@@ -130,7 +130,7 @@ def adjust_sharpen(image, strength= 0.0, kernel_size = 3):
     if(strength < 0):
             kernel = np.array([[0, 0, 0], 
                             [0, 1, 0],
-                            [0, 0, 0]])
+                            [0, 0, 0]]) #Anhr goc
     else:
         kernel = np.array([[-1, -1, -1], 
                         [-1, 9 + strength, -1],
@@ -257,7 +257,7 @@ def on_trackbar_change(_):
     adjusted = adjust_saturation(adjusted,saturation)
     vignette_strength = cv2.getTrackbarPos('Vignette', 'Trackbars') / 1000
     adjusted = adjust_vignette(adjusted,vignette_strength)
-    blur_kernel_size = cv2.getTrackbarPos('Blur','Trackbars')
+    blur_kernel_size = cv2.getTrackbarPos('BlurKSZ','Trackbars')
     if blur_kernel_size % 2 == 0:
         blur_kernel_size += 1
 
@@ -312,7 +312,7 @@ def open_image_editor():
         cv2.createTrackbar('Solarization', trackbar_window, initial_solarization, 255, on_trackbar_change) # Base là 120
         cv2.createTrackbar('Saturation', trackbar_window, 100,200, on_trackbar_change) # 0 ->2 , bằng 1 thì giữ nguyên
         cv2.createTrackbar('Vignette', trackbar_window, 0 , 1000, on_trackbar_change )
-        cv2.createTrackbar('Blur', trackbar_window, 1, 51, on_trackbar_change)
+        cv2.createTrackbar('BlurKSZ', trackbar_window, 1, 51, on_trackbar_change)
         cv2.createTrackbar('Sepia',trackbar_window, 0 , 1 , on_trackbar_change)
         cv2.createTrackbar('ReduceNoise',trackbar_window, 0 , 1 , on_trackbar_change)
         cv2.createTrackbar('GrayScale',trackbar_window, 0 , 1 , on_trackbar_change)

@@ -42,7 +42,8 @@ def chroma_key(background_img_path, object_img_path):
 '''
 # Đường dẫn đến ảnh nền và ảnh với vật thể
 background_path = 'D:\\XuLyAnh\\IMAGE\\green_plain_bg.jpg'
-object_path = 'D:\\XuLyAnh\\IMAGE\\elephant_green.png'
+#object_path = 'D:\\XuLyAnh\\IMAGE\\elephant_green.png'
+object_path ='D:\\XuLyAnh\\IMAGE\\minion_in_green.jpg'
 
 background = cv2.imread(background_path)
 object_img = cv2.imread(object_path)
@@ -52,24 +53,31 @@ if background.shape[:2] != object_img.shape[:2]:
     background = cv2.resize(background, (object_img.shape[1], object_img.shape[0]), interpolation=cv2.INTER_LINEAR)
 
 # Convert the object image to the HSV color space
+#chuyển ảnh đối tượng từ không gian màu BGR (mặc định của ảnh trong OpenCV) sang không gian màu HSV, giúp dễ dàng tách màu xanh lá hơn.
 hsv = cv2.cvtColor(object_img, cv2.COLOR_BGR2HSV)
 
+
 # Define the range of the green color in HSV
+#Tạo một mảng NumPy lower_green và upper_green để xác định phạm vi màu xanh lá trong không gian màu HSV.
 # These values can be adjusted to better fit the green screen color range
 lower_green = np.array([40, 40, 40])
 upper_green = np.array([70, 255, 255])
 
 # Create a mask that detects only green colors in the image
+#Tạo mask cho màu xanh lá hàm cv2.inRange với hai phạm vi màu xanh đã xác định để tạo một mặt nạ chỉ chứa màu xanh lá.
 mask = cv2.inRange(hsv, lower_green, upper_green)
 
 # Invert the mask to get the elephant
+#Đảo ngược mặt nạ: Sử dụng hàm cv2.bitwise_not để đảo ngược mặt nạ. Phần màu trắng trên mặt nạ ban đầu (màu xanh lá) sẽ trở thành màu đen và ngược lạ
 mask_inv = cv2.bitwise_not(mask)
 
+
+#Trích xuất đối tượng từ ảnh: Sử dụng hàm cv2.bitwise_and với mặt nạ đảo ngược để giữ lại chỉ phần của đối tượng trên ảnh. Nền xanh lá sẽ bị loại bỏ do nó đã trở thành màu đen trên mặt nạ đảo ngược.
 # Use the inverted mask to extract the elephant from the object image
-elephant_extracted = cv2.bitwise_and(object_img, object_img, mask=mask_inv)
+object_extracted = cv2.bitwise_and(object_img, object_img, mask=mask_inv)
 # Hiển thị và lưu kết quả nếu thành công
-if elephant_extracted is not None:
-    cv2.imshow('Chroma Key Result', elephant_extracted)
+if object_extracted is not None:
+    cv2.imshow('Chroma Key Result', object_extracted)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-    cv2.imwrite('D:\\XuLyAnh\\IMAGE\\chroma_key_result.jpg', elephant_extracted)
+    cv2.imwrite('D:\\XuLyAnh\\IMAGE\\chroma_key_result.jpg', object_extracted)
